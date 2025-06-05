@@ -36,11 +36,30 @@ func listTasks(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	taskMux.Lock()
 	defer taskMux.Unlock()
 
-	var taskList []Task
-	for _, task := range tasks {
-		taskList = append(taskList, task)
+	// Get "done" query param (optional)
+	doneParam := r.URL.Query().Get("done")
+
+	var filtered []Task
+	if doneParam == "" {
+		// No filter, return all tasks
+		for _, t := range tasks {
+			filtered = append(filtered, t)
+		}
+	} else {
+		// Parse doneParam to bool
+		done, err := strconv.ParseBool(doneParam)
+		if err != nil {
+			http.Error(w, "Invalid done parameter, must be true or false", http.StatusBadRequest)
+			return
+		}
+		for _, t := range tasks {
+			if t.Done == done {
+				filtered = append(filtered, t)
+			}
+		}
 	}
-	jsonResponse(w, taskList, http.StatusOK)
+
+	jsonResponse(w, filtered, http.StatusOK)
 }
 
 func updateTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
