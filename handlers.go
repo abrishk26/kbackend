@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"encoding/json"
 	"strconv"
+	"fmt"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -82,5 +83,9 @@ func deleteTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	delete(tasks, id)
 	saveTasks()
-	w.WriteHeader(http.StatusNoContent)
+
+	response := map[string]string{
+		"message": fmt.Sprintf("Task with ID %d has been deleted", id),
+	}
+	jsonResponse(w, response, http.StatusOK)
 }
