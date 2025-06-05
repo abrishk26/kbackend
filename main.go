@@ -46,12 +46,37 @@ func jsonResponse(w http.ResponseWriter, data any, status int) {
 	json.NewEncoder(w).Encode(data)
 }
 
+func loadTasks() {
+	file, err := os.ReadFile(dataFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return // file doesn't exist yet
+		}
+		log.Fatalf("Failed to read data file: %v", err)
+	}
+
+	var taskList []Task
+	if err := json.Unmarshal(file, &taskList); err != nil {
+		log.Fatalf("Failed to parse JSON: %v", err)
+	}
+
+	for _, t := range taskList {
+		tasks[t.ID] = t
+		if t.ID >= nextID {
+			nextID = t.ID + 1
+		}
+	}
+}
+
 func main() {
+	loadTasks()
+
 	// Router
 	router := httprouter.New()
 
 	router.GET("/health_check", healthCheck)
 	router.POST("/api/tasks", createTask)
+	router.GET("/api/tasks", listTasks)
 
 	// Server
 	server := &http.Server {

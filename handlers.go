@@ -29,3 +29,14 @@ func createTask(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 
 	jsonResponse(w, t, http.StatusCreated)
 }
+
+func listTasks(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+	taskMux.Lock()
+	defer taskMux.Unlock()
+
+	var taskList []Task
+	for _, task := range tasks {
+		taskList = append(taskList, task)
+	}
+	jsonResponse(w, taskList, http.StatusOK)
+}
