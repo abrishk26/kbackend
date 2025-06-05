@@ -64,3 +64,23 @@ func updateTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	jsonResponse(w, task, http.StatusOK)
 }
+
+func deleteTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	id, err := strconv.Atoi(ps.ByName("id"))
+	if err != nil {
+		http.Error(w, "Invalid ID", http.StatusBadRequest)
+		return
+	}
+
+	taskMux.Lock()
+	defer taskMux.Unlock()
+
+	if _, exists := tasks[id]; !exists {
+		http.Error(w, "Task not found", http.StatusNotFound)
+		return
+	}
+
+	delete(tasks, id)
+	saveTasks()
+	w.WriteHeader(http.StatusNoContent)
+}
