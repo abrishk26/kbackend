@@ -3,6 +3,6 @@
     "id": 1,
     "title": "Test Title",
     "details": "Test Detail",
-    "done": false
+    "done": true
   }
 ]

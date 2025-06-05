@@ -77,6 +77,7 @@ func main() {
 	router.GET("/health_check", healthCheck)
 	router.POST("/api/tasks", createTask)
 	router.GET("/api/tasks", listTasks)
+	router.PUT("/api/tasks/:id", updateTask)
 
 	// Server
 	server := &http.Server {

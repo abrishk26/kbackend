@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 	"encoding/json"
+	"strconv"
 
 	"github.com/julienschmidt/httprouter"
 )
@@ -39,4 +40,27 @@ func listTasks(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 		taskList = append(taskList, task)
 	}
 	jsonResponse(w, taskList, http.StatusOK)
+}
+
+func updateTask(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	id, err := strconv.Atoi(ps.ByName("id"))
+	if err != nil {
+		http.Error(w, "Invalid task ID", http.StatusBadRequest)
+		return
+	}
+
+	taskMux.Lock()
+	defer taskMux.Unlock()
+
+	task, exists := tasks[id]
+	if !exists {
+		http.Error(w, "Task not found", http.StatusNotFound)
+		return
+	}
+
+	task.Done = true
+	tasks[id] = task
+	saveTasks()
+
+	jsonResponse(w, task, http.StatusOK)
 }
